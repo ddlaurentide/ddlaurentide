@@ -1,0 +1,179 @@
+<html><head><base href="https://myshoppinglist.app/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Shopping List App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    .container {
+        width: 80%;
+        margin: auto;
+        overflow: hidden;
+        padding: 20px;
+    }
+    header {
+        background: #35424a;
+        color: white;
+        padding-top: 30px;
+        min-height: 70px;
+        border-bottom: #e8491d 3px solid;
+    }
+    header h1 {
+        margin: 0;
+        text-align: center;
+    }
+    #shopping-list {
+        background: #fff;
+        border-radius: 5px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #shopping-list h2 {
+        margin-top: 0;
+        color: #35424a;
+    }
+    #item-input {
+        width: 70%;
+        padding: 10px;
+        margin-right: 10px;
+    }
+    #add-item {
+        padding: 10px 15px;
+        background: #e8491d;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+    #add-item:hover {
+        background: #ff6347;
+    }
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        background: #f4f4f4;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .delete-item {
+        background: #ff0000;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    .delete-item:hover {
+        background: #cc0000;
+    }
+    .completed {
+        text-decoration: line-through;
+        color: #888;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>My Shopping List App</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="shopping-list">
+            <h2>Add Items to Your List</h2>
+            <input type="text" id="item-input" placeholder="Enter an item">
+            <button id="add-item">Add Item</button>
+            <ul id="list"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const itemInput = document.getElementById('item-input');
+            const addItemButton = document.getElementById('add-item');
+            const shoppingList = document.getElementById('list');
+
+            // Load items from localStorage
+            let items = JSON.parse(localStorage.getItem('shoppingList')) || [];
+
+            function renderList() {
+                shoppingList.innerHTML = '';
+                items.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span class="${item.completed ? 'completed' : ''}">${item.name}</span>
+                        <div>
+                            <button class="complete-item" data-index="${index}">✓</button>
+                            <button class="delete-item" data-index="${index}">X</button>
+                        </div>
+                    `;
+                    shoppingList.appendChild(li);
+                });
+                saveToLocalStorage();
+            }
+
+            function addItem(item) {
+                items.push({ name: item, completed: false });
+                renderList();
+            }
+
+            function deleteItem(index) {
+                items.splice(index, 1);
+                renderList();
+            }
+
+            function toggleComplete(index) {
+                items[index].completed = !items[index].completed;
+                renderList();
+            }
+
+            function saveToLocalStorage() {
+                localStorage.setItem('shoppingList', JSON.stringify(items));
+            }
+
+            addItemButton.addEventListener('click', () => {
+                const newItem = itemInput.value.trim();
+                if (newItem) {
+                    addItem(newItem);
+                    itemInput.value = '';
+                }
+            });
+
+            itemInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const newItem = itemInput.value.trim();
+                    if (newItem) {
+                        addItem(newItem);
+                        itemInput.value = '';
+                    }
+                }
+            });
+
+            shoppingList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-item')) {
+                    const index = e.target.getAttribute('data-index');
+                    deleteItem(index);
+                }
+                if (e.target.classList.contains('complete-item')) {
+                    const index = e.target.getAttribute('data-index');
+                    toggleComplete(index);
+                }
+            });
+
+            // Initial render
+            renderList();
+        });
+    </script>
+</body>
+</html>
